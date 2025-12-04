@@ -1,0 +1,1580 @@
+<!DOCTYPE html>
+<html lang="da">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Opgave Prioritering</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Source+Sans+3:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --color-bg: #FAFAF8;
+            --color-surface: #FFFFFF;
+            --color-surface-hover: #F5F5F3;
+            --color-border: #E8E6E1;
+            --color-border-strong: #D4D1C9;
+            --color-text: #2C2C2C;
+            --color-text-muted: #6B6B6B;
+            --color-text-light: #9A9A9A;
+            --color-accent: #3D5A80;
+            --color-accent-light: #98C1D9;
+            --color-positive-strong: #2D6A4F;
+            --color-positive: #40916C;
+            --color-positive-light: #B7E4C7;
+            --color-negative-strong: #9D0208;
+            --color-negative: #DC2F02;
+            --color-negative-light: #FFCCD5;
+            --color-warning: #E09F3E;
+            --color-warning-light: #FFF3CD;
+            --font-display: 'Fraunces', Georgia, serif;
+            --font-body: 'Source Sans 3', -apple-system, sans-serif;
+            --shadow-sm: 0 1px 2px rgba(0,0,0,0.04);
+            --shadow-md: 0 4px 12px rgba(0,0,0,0.06);
+            --shadow-lg: 0 8px 24px rgba(0,0,0,0.08);
+            --radius-sm: 6px;
+            --radius-md: 10px;
+            --radius-lg: 16px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: var(--font-body);
+            background: var(--color-bg);
+            color: var(--color-text);
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        .header {
+            background: var(--color-surface);
+            border-bottom: 1px solid var(--color-border);
+            padding: 1.5rem 2rem;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .logo {
+            font-family: var(--font-display);
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--color-accent);
+            letter-spacing: -0.02em;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 0.75rem;
+            flex-wrap: wrap;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 0.25rem;
+            background: var(--color-bg);
+            padding: 0.25rem;
+            border-radius: var(--radius-md);
+        }
+
+        .tab {
+            padding: 0.6rem 1.25rem;
+            border: none;
+            background: transparent;
+            font-family: var(--font-body);
+            font-size: 0.95rem;
+            font-weight: 500;
+            color: var(--color-text-muted);
+            cursor: pointer;
+            border-radius: var(--radius-sm);
+            transition: all 0.2s ease;
+        }
+
+        .tab:hover {
+            color: var(--color-text);
+            background: var(--color-surface);
+        }
+
+        .tab.active {
+            background: var(--color-surface);
+            color: var(--color-accent);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .btn {
+            padding: 0.6rem 1.25rem;
+            border: 1px solid var(--color-border);
+            background: var(--color-surface);
+            font-family: var(--font-body);
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: var(--color-text);
+            cursor: pointer;
+            border-radius: var(--radius-sm);
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn:hover {
+            background: var(--color-surface-hover);
+            border-color: var(--color-border-strong);
+        }
+
+        .btn-primary {
+            background: var(--color-accent);
+            border-color: var(--color-accent);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #344E6E;
+            border-color: #344E6E;
+        }
+
+        .btn-small {
+            padding: 0.4rem 0.75rem;
+            font-size: 0.85rem;
+        }
+
+        .btn-icon {
+            padding: 0.5rem;
+            min-width: 36px;
+            justify-content: center;
+        }
+
+        .main {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .tasks-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .tasks-title {
+            font-family: var(--font-display);
+            font-size: 1.75rem;
+            font-weight: 600;
+            color: var(--color-text);
+        }
+
+        .tasks-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+            gap: 1.25rem;
+        }
+
+        .task-card {
+            background: var(--color-surface);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-sm);
+            transition: all 0.2s ease;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .task-card:hover {
+            box-shadow: var(--shadow-md);
+            border-color: var(--color-border-strong);
+        }
+
+        .task-card.collapsed {
+            background: var(--color-surface-hover);
+        }
+
+        .task-card.collapsed .task-card-body {
+            display: none;
+        }
+
+        .task-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 1.25rem;
+            gap: 0.75rem;
+            cursor: pointer;
+            border-bottom: 1px solid transparent;
+            transition: border-color 0.2s ease;
+        }
+
+        .task-card:not(.collapsed) .task-card-header {
+            border-bottom-color: var(--color-border);
+        }
+
+        .task-card-header:hover {
+            background: var(--color-surface-hover);
+        }
+
+        .task-name-wrapper {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .collapse-icon {
+            color: var(--color-text-muted);
+            font-size: 0.8rem;
+            transition: transform 0.2s ease;
+            flex-shrink: 0;
+        }
+
+        .task-card.collapsed .collapse-icon {
+            transform: rotate(-90deg);
+        }
+
+        .task-name {
+            font-family: var(--font-display);
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--color-text);
+        }
+
+        .task-name-input {
+            font-family: var(--font-display);
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--color-text);
+            border: none;
+            background: transparent;
+            width: 100%;
+            padding: 0.25rem 0;
+            border-bottom: 2px solid var(--color-accent);
+            transition: border-color 0.2s ease;
+        }
+
+        .task-name-input:focus {
+            outline: none;
+            border-bottom-color: var(--color-accent);
+        }
+
+        .task-name-input::placeholder {
+            color: var(--color-text-light);
+            font-style: italic;
+        }
+
+        .task-card-actions {
+            display: flex;
+            gap: 0.25rem;
+            flex-shrink: 0;
+        }
+
+        .delete-btn {
+            color: var(--color-text-light);
+            border-color: transparent;
+            background: transparent;
+        }
+
+        .delete-btn:hover {
+            color: var(--color-negative);
+            background: var(--color-negative-light);
+            border-color: transparent;
+        }
+
+        .task-card-body {
+            padding: 1.25rem;
+        }
+
+        .quality-group {
+            margin-bottom: 1.25rem;
+        }
+
+        .quality-group:last-child {
+            margin-bottom: 0;
+        }
+
+        .quality-header {
+            margin-bottom: 0.5rem;
+        }
+
+        .quality-label {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 1rem;
+        }
+
+        .quality-name {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--color-text);
+        }
+
+        .quality-description {
+            font-size: 0.8rem;
+            font-style: italic;
+            color: var(--color-text-muted);
+            margin-top: 0.15rem;
+        }
+
+        .quality-value {
+            font-size: 0.8rem;
+            font-weight: 600;
+            padding: 0.15rem 0.5rem;
+            border-radius: 4px;
+            flex-shrink: 0;
+        }
+
+        .quality-value[data-value="-2"] {
+            background: var(--color-negative-light);
+            color: var(--color-negative-strong);
+        }
+
+        .quality-value[data-value="-1"] {
+            background: var(--color-warning-light);
+            color: #B8860B;
+        }
+
+        .quality-value[data-value="1"] {
+            background: #E8F5E9;
+            color: var(--color-positive);
+        }
+
+        .quality-value[data-value="2"] {
+            background: var(--color-positive-light);
+            color: var(--color-positive-strong);
+        }
+
+        .segment-control {
+            display: flex;
+            background: var(--color-bg);
+            border-radius: var(--radius-sm);
+            padding: 3px;
+            gap: 3px;
+        }
+
+        .segment-btn {
+            flex: 1;
+            padding: 0.5rem 0.25rem;
+            border: none;
+            background: transparent;
+            font-family: var(--font-body);
+            font-size: 0.75rem;
+            font-weight: 500;
+            color: var(--color-text-muted);
+            cursor: pointer;
+            border-radius: 4px;
+            transition: all 0.15s ease;
+            text-align: center;
+        }
+
+        .segment-btn:hover {
+            background: var(--color-surface);
+            color: var(--color-text);
+        }
+
+        .segment-btn.active {
+            background: var(--color-surface);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .segment-btn.active[data-value="-2"] {
+            color: var(--color-negative-strong);
+        }
+
+        .segment-btn.active[data-value="-1"] {
+            color: #B8860B;
+        }
+
+        .segment-btn.active[data-value="1"] {
+            color: var(--color-positive);
+        }
+
+        .segment-btn.active[data-value="2"] {
+            color: var(--color-positive-strong);
+        }
+
+        .add-card {
+            background: transparent;
+            border: 2px dashed var(--color-border);
+            border-radius: var(--radius-lg);
+            padding: 3rem 1.5rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            min-height: 200px;
+        }
+
+        .add-card:hover {
+            border-color: var(--color-accent);
+            background: rgba(61, 90, 128, 0.03);
+        }
+
+        .add-card-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: var(--color-bg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 0.75rem;
+            font-size: 1.5rem;
+            color: var(--color-accent);
+        }
+
+        .add-card-text {
+            font-weight: 500;
+            color: var(--color-text-muted);
+        }
+
+        .view-controls {
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+        }
+
+        .perspective-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .perspective-title {
+            font-family: var(--font-display);
+            font-size: 1.75rem;
+            font-weight: 600;
+        }
+
+        .perspective-subtitle {
+            color: var(--color-text-muted);
+            margin-top: 0.25rem;
+            font-size: 0.95rem;
+        }
+
+        .charts-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(520px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .chart-card {
+            background: var(--color-surface);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-lg);
+            padding: 1.5rem;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .chart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 1rem;
+        }
+
+        .chart-title {
+            font-family: var(--font-display);
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+
+        .chart-area {
+            display: flex;
+            gap: 1rem;
+            align-items: flex-start;
+        }
+
+        .chart-container {
+            position: relative;
+            flex: 1;
+            aspect-ratio: 1;
+            max-height: 350px;
+        }
+
+        .chart-svg {
+            width: 100%;
+            height: 100%;
+        }
+
+        .chart-legend {
+            width: 150px;
+            flex-shrink: 0;
+            font-size: 0.8rem;
+            max-height: 350px;
+            overflow-y: auto;
+        }
+
+        .chart-legend-title {
+            font-weight: 600;
+            color: var(--color-text);
+            margin-bottom: 0.5rem;
+            font-size: 0.85rem;
+        }
+
+        .chart-legend-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.35rem 0;
+            border-bottom: 1px solid var(--color-border);
+        }
+
+        .chart-legend-item:last-child {
+            border-bottom: none;
+        }
+
+        .chart-legend-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+
+        .chart-legend-name {
+            color: var(--color-text);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .chart-axis-label {
+            font-size: 12px;
+            fill: var(--color-text-muted);
+            font-family: var(--font-body);
+            font-weight: 600;
+        }
+
+        .chart-point {
+            cursor: pointer;
+            transition: all 0.15s ease;
+        }
+
+        .chart-point:hover circle {
+            r: 14;
+        }
+
+        .chart-point-number {
+            font-size: 10px;
+            fill: white;
+            font-family: var(--font-body);
+            font-weight: 600;
+            pointer-events: none;
+            text-anchor: middle;
+            dominant-baseline: central;
+        }
+
+        .quadrant-hints {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.75rem;
+            margin-top: 1.25rem;
+        }
+
+        .quadrant-hint {
+            padding: 0.75rem;
+            background: var(--color-bg);
+            border-radius: var(--radius-sm);
+            border-left: 3px solid var(--color-border);
+        }
+
+        .quadrant-hint.top-left {
+            border-left-color: var(--color-warning);
+        }
+
+        .quadrant-hint.top-right {
+            border-left-color: var(--color-positive);
+        }
+
+        .quadrant-hint.bottom-left {
+            border-left-color: var(--color-negative);
+        }
+
+        .quadrant-hint.bottom-right {
+            border-left-color: var(--color-warning);
+        }
+
+        .quadrant-hint-title {
+            font-weight: 600;
+            color: var(--color-text);
+            font-size: 0.85rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .quadrant-hint-desc {
+            font-size: 0.8rem;
+            color: var(--color-text-muted);
+            font-style: italic;
+        }
+
+        .chart-builder {
+            background: var(--color-bg);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-lg);
+            padding: 1.5rem;
+        }
+
+        .chart-builder-title {
+            font-family: var(--font-display);
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+        }
+
+        .chart-builder-form {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            align-items: flex-end;
+        }
+
+        .form-group {
+            flex: 1;
+            min-width: 150px;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: var(--color-text-muted);
+            margin-bottom: 0.5rem;
+        }
+
+        .form-select {
+            width: 100%;
+            padding: 0.6rem 0.75rem;
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-sm);
+            font-family: var(--font-body);
+            font-size: 0.9rem;
+            background: var(--color-surface);
+            cursor: pointer;
+        }
+
+        .form-select:focus {
+            outline: none;
+            border-color: var(--color-accent);
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 4rem 2rem;
+            color: var(--color-text-muted);
+        }
+
+        .empty-state-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            opacity: 0.5;
+        }
+
+        .empty-state-title {
+            font-family: var(--font-display);
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--color-text);
+            margin-bottom: 0.5rem;
+        }
+
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.4);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            padding: 1rem;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal {
+            background: var(--color-surface);
+            border-radius: var(--radius-lg);
+            padding: 2rem;
+            max-width: 500px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: var(--shadow-lg);
+        }
+
+        .modal-title {
+            font-family: var(--font-display);
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 0.75rem;
+            justify-content: flex-end;
+            margin-top: 1.5rem;
+        }
+
+        .export-textarea {
+            width: 100%;
+            min-height: 200px;
+            padding: 1rem;
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-sm);
+            font-family: monospace;
+            font-size: 0.85rem;
+            resize: vertical;
+        }
+
+        .tooltip {
+            position: absolute;
+            background: var(--color-text);
+            color: white;
+            padding: 0.5rem 0.75rem;
+            border-radius: var(--radius-sm);
+            font-size: 0.85rem;
+            pointer-events: none;
+            z-index: 1000;
+            max-width: 200px;
+            opacity: 0;
+            transition: opacity 0.15s ease;
+        }
+
+        .tooltip.visible {
+            opacity: 1;
+        }
+
+        @media (max-width: 768px) {
+            .header {
+                padding: 1rem;
+            }
+
+            .main {
+                padding: 1rem;
+            }
+
+            .tasks-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .charts-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .header-content {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .tabs {
+                justify-content: center;
+            }
+
+            .header-actions {
+                justify-content: center;
+            }
+
+            .chart-builder-form {
+                flex-direction: column;
+            }
+
+            .form-group {
+                width: 100%;
+            }
+
+            .chart-area {
+                flex-direction: column;
+            }
+
+            .chart-legend {
+                width: 100%;
+                max-height: none;
+                display: flex;
+                flex-wrap: wrap;
+                gap: 0.5rem;
+            }
+
+            .chart-legend-item {
+                border-bottom: none;
+                background: var(--color-bg);
+                padding: 0.25rem 0.5rem;
+                border-radius: 4px;
+            }
+
+            .view-controls {
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+        }
+
+        @media print {
+            .header, .btn, .add-card, .chart-builder {
+                display: none !important;
+            }
+
+            .main {
+                padding: 0;
+            }
+
+            .task-card, .chart-card {
+                break-inside: avoid;
+                box-shadow: none;
+                border: 1px solid #ddd;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="header-content">
+            <div class="logo">Opgave Prioritering</div>
+            <div class="tabs">
+                <button class="tab active" data-tab="tasks">Opgaver</button>
+                <button class="tab" data-tab="perspective">Perspektiver</button>
+            </div>
+            <div class="header-actions">
+                <button class="btn" onclick="exportData()">
+                    <span>↓</span> Eksporter
+                </button>
+                <button class="btn" onclick="showImportModal()">
+                    <span>↑</span> Importer
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main class="main">
+        <div id="tasks-tab" class="tab-content active">
+            <div class="tasks-header">
+                <h1 class="tasks-title">Forretningens opgaver</h1>
+                <div class="view-controls">
+                    <button class="btn btn-small" onclick="toggleAllTasks(true)">Fold alle sammen</button>
+                    <button class="btn btn-small" onclick="toggleAllTasks(false)">Fold alle ud</button>
+                    <button class="btn btn-primary" onclick="addTask()">
+                        <span>+</span> Tilføj Opgave
+                    </button>
+                </div>
+            </div>
+            <div id="tasks-grid" class="tasks-grid"></div>
+        </div>
+
+        <div id="perspective-tab" class="tab-content">
+            <div class="perspective-header">
+                <div>
+                    <h1 class="perspective-title">Perspektiver</h1>
+                    <p class="perspective-subtitle">Se dine opgaver fra forskellige vinkler for at træffe bedre beslutninger</p>
+                </div>
+            </div>
+
+            <div class="chart-builder" style="margin-bottom: 1.5rem;">
+                <h3 class="chart-builder-title">Opret dit eget perspektiv</h3>
+                <div class="chart-builder-form">
+                    <div class="form-group">
+                        <label class="form-label">X-akse</label>
+                        <select id="custom-x-axis" class="form-select">
+                            <option value="profitability">Profitabilitet</option>
+                            <option value="complexity">Kompleksitet</option>
+                            <option value="risk">Risiko</option>
+                            <option value="frequency">Hyppighed</option>
+                            <option value="annoyance">Træls-faktor</option>
+                            <option value="automation">Automatiseringsgrad</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Y-akse</label>
+                        <select id="custom-y-axis" class="form-select">
+                            <option value="frequency">Hyppighed</option>
+                            <option value="profitability">Profitabilitet</option>
+                            <option value="complexity">Kompleksitet</option>
+                            <option value="risk">Risiko</option>
+                            <option value="annoyance">Træls-faktor</option>
+                            <option value="automation">Automatiseringsgrad</option>
+                        </select>
+                    </div>
+                    <button class="btn btn-primary" onclick="addCustomChart()">Tilføj perspektiv</button>
+                </div>
+            </div>
+
+            <div id="charts-grid" class="charts-grid"></div>
+        </div>
+    </main>
+
+    <div id="import-modal" class="modal-overlay">
+        <div class="modal">
+            <h2 class="modal-title">Importer Data</h2>
+            <p style="color: var(--color-text-muted); margin-bottom: 1rem; font-size: 0.9rem;">
+                Indsæt tidligere eksporteret JSON-data herunder.
+            </p>
+            <textarea id="import-textarea" class="export-textarea" placeholder='{"tasks": [...], "charts": [...]}'></textarea>
+            <div class="modal-actions">
+                <button class="btn" onclick="hideImportModal()">Annuller</button>
+                <button class="btn btn-primary" onclick="importData()">Importer</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="tooltip" class="tooltip"></div>
+
+    <script>
+        let appState = {
+            tasks: [],
+            charts: [
+                { id: 'default-1', xAxis: 'profitability', yAxis: 'frequency', isDefault: true },
+                { id: 'default-2', xAxis: 'complexity', yAxis: 'automation', isDefault: true },
+                { id: 'default-3', xAxis: 'risk', yAxis: 'profitability', isDefault: true },
+                { id: 'default-4', xAxis: 'annoyance', yAxis: 'frequency', isDefault: true }
+            ],
+            collapsedTasks: {}
+        };
+
+        const qualities = {
+            profitability: {
+                name: 'Profitabilitet',
+                description: 'Hvor godt med penge tjener I på denne opgave?',
+                labels: {
+                    '-2': 'Slet ikke profitabelt',
+                    '-1': 'Lidt profitabelt',
+                    '1': 'Profitabelt',
+                    '2': 'Meget profitabelt'
+                },
+                axisLabels: { negative: 'Lav profit', positive: 'Høj profit' }
+            },
+            complexity: {
+                name: 'Kompleksitet',
+                description: 'Hvor komplekst er det at løse denne opgave?',
+                labels: {
+                    '-2': 'Meget svært',
+                    '-1': 'Svært',
+                    '1': 'Nemt',
+                    '2': 'Meget nemt'
+                },
+                axisLabels: { negative: 'Komplekst', positive: 'Simpelt' }
+            },
+            risk: {
+                name: 'Risiko',
+                description: 'Hvor stor risiko er der ved at løse denne opgave forkert?',
+                labels: {
+                    '-2': 'Meget risikofyldt',
+                    '-1': 'Risikofyldt',
+                    '1': 'Lav risiko',
+                    '2': 'Ingen risiko'
+                },
+                axisLabels: { negative: 'Høj risiko', positive: 'Lav risiko' }
+            },
+            frequency: {
+                name: 'Hyppighed',
+                description: 'Hvor ofte udfører I denne opgave?',
+                labels: {
+                    '-2': 'Meget sjældent',
+                    '-1': 'Sjældent',
+                    '1': 'Ofte',
+                    '2': 'Meget ofte'
+                },
+                axisLabels: { negative: 'Sjælden', positive: 'Hyppig' }
+            },
+            annoyance: {
+                name: 'Træls-faktor',
+                description: 'Hvor træls eller fedt er det at udføre denne opgave?',
+                labels: {
+                    '-2': 'Meget træls',
+                    '-1': 'Træls',
+                    '1': 'Fint nok',
+                    '2': 'Meget fedt'
+                },
+                axisLabels: { negative: 'Træls', positive: 'Fedt' }
+            },
+            automation: {
+                name: 'Automatiseringsgrad',
+                description: 'Hvor meget af opgaven er automatiseret i dag?',
+                labels: {
+                    '-2': 'Helt manuelt',
+                    '-1': 'Mest manuelt',
+                    '1': 'Mest automatisk',
+                    '2': 'Helt automatisk'
+                },
+                axisLabels: { negative: 'Manuelt', positive: 'Automatisk' }
+            }
+        };
+
+        function getQuadrantInsights(xAxis, yAxis) {
+            const xQ = qualities[xAxis];
+            const yQ = qualities[yAxis];
+            
+            return {
+                topLeft: {
+                    title: `${yQ.axisLabels.positive} & ${xQ.axisLabels.negative}`,
+                    desc: getActionableAdvice(xAxis, yAxis, 'topLeft')
+                },
+                topRight: {
+                    title: `${yQ.axisLabels.positive} & ${xQ.axisLabels.positive}`,
+                    desc: getActionableAdvice(xAxis, yAxis, 'topRight')
+                },
+                bottomLeft: {
+                    title: `${yQ.axisLabels.negative} & ${xQ.axisLabels.negative}`,
+                    desc: getActionableAdvice(xAxis, yAxis, 'bottomLeft')
+                },
+                bottomRight: {
+                    title: `${yQ.axisLabels.negative} & ${xQ.axisLabels.positive}`,
+                    desc: getActionableAdvice(xAxis, yAxis, 'bottomRight')
+                }
+            };
+        }
+
+        function getActionableAdvice(xAxis, yAxis, quadrant) {
+            const key = `${xAxis}-${yAxis}-${quadrant}`;
+            const specificAdvice = {
+                'profitability-frequency-topRight': 'Jeres kerneopgaver! Beskyt og optimer disse.',
+                'profitability-frequency-topLeft': 'Hvordan kan I øge profitten på disse hyppige opgaver?',
+                'profitability-frequency-bottomRight': 'Kan I øge hyppigheden af disse profitable opgaver?',
+                'profitability-frequency-bottomLeft': 'Overvej om disse opgaver er værd at beholde.',
+                
+                'complexity-automation-topRight': 'Ideelt! Disse kører godt.',
+                'complexity-automation-topLeft': 'Lavthængende frugter: Simple opgaver der kan automatiseres.',
+                'complexity-automation-bottomRight': 'Evaluer om automatiseringen faktisk virker.',
+                'complexity-automation-bottomLeft': 'Udfordrende: Hvad kan gøres for at forenkle eller automatisere?',
+                
+                'risk-profitability-topRight': 'Guldgruber! Fokuser på disse.',
+                'risk-profitability-topLeft': 'Kan I øge profitten uden at øge risikoen?',
+                'risk-profitability-bottomRight': 'Hvad kan I gøre for at reducere risikoen?',
+                'risk-profitability-bottomLeft': 'Farezone: Overvej at stoppe eller ændre drastisk.',
+                
+                'annoyance-frequency-topRight': 'Perfekt! Opgaver I nyder at lave ofte.',
+                'annoyance-frequency-topLeft': 'Hyppige og trælse: Prioriter automatisering her!',
+                'annoyance-frequency-bottomRight': 'Sjældne glæder: Fin niche.',
+                'annoyance-frequency-bottomLeft': 'Hvorfor gør I overhovedet dette?'
+            };
+
+            if (specificAdvice[key]) {
+                return specificAdvice[key];
+            }
+
+            const xQ = qualities[xAxis];
+            const yQ = qualities[yAxis];
+            
+            switch (quadrant) {
+                case 'topRight':
+                    return `Godt sted at være: ${yQ.axisLabels.positive.toLowerCase()} og ${xQ.axisLabels.positive.toLowerCase()}.`;
+                case 'topLeft':
+                    return `Hvordan kan I forbedre ${xQ.name.toLowerCase()}en?`;
+                case 'bottomRight':
+                    return `Hvordan kan I forbedre ${yQ.name.toLowerCase()}en?`;
+                case 'bottomLeft':
+                    return `Overvej grundigt om denne opgave skal ændres eller droppes.`;
+                default:
+                    return '';
+            }
+        }
+
+        const taskColors = [
+            '#3D5A80', '#E07A5F', '#81B29A', '#F2CC8F', '#7209B7',
+            '#3A0CA3', '#4361EE', '#4CC9F0', '#F72585', '#B5838D',
+            '#6D597A', '#355070', '#B56576', '#E56B6F', '#EAAC8B'
+        ];
+
+        function getTaskColor(index) {
+            return taskColors[index % taskColors.length];
+        }
+
+        function generateId() {
+            return 'id-' + Math.random().toString(36).substr(2, 9);
+        }
+
+        function init() {
+            loadFromStorage();
+            renderTasks();
+            renderCharts();
+            setupTabNavigation();
+        }
+
+        function setupTabNavigation() {
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.addEventListener('click', () => {
+                    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                    document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                    tab.classList.add('active');
+                    document.getElementById(`${tab.dataset.tab}-tab`).classList.add('active');
+                    if (tab.dataset.tab === 'perspective') {
+                        renderCharts();
+                    }
+                });
+            });
+        }
+
+        function addTask() {
+            const newTask = {
+                id: generateId(),
+                name: '',
+                profitability: 1,
+                complexity: 1,
+                risk: 1,
+                frequency: 1,
+                annoyance: 1,
+                automation: -1
+            };
+            appState.tasks.unshift(newTask);
+            appState.collapsedTasks[newTask.id] = false;
+            saveToStorage();
+            renderTasks();
+            
+            setTimeout(() => {
+                const input = document.querySelector(`[data-task-id="${newTask.id}"] .task-name-input`);
+                if (input) input.focus();
+            }, 100);
+        }
+
+        function deleteTask(id, event) {
+            event.stopPropagation();
+            if (confirm('Er du sikker på, at du vil slette denne opgave?')) {
+                appState.tasks = appState.tasks.filter(t => t.id !== id);
+                delete appState.collapsedTasks[id];
+                saveToStorage();
+                renderTasks();
+            }
+        }
+
+        function toggleTask(id, event) {
+            if (event.target.tagName === 'INPUT' || event.target.tagName === 'BUTTON') {
+                return;
+            }
+            appState.collapsedTasks[id] = !appState.collapsedTasks[id];
+            saveToStorage();
+            renderTasks();
+        }
+
+        function toggleAllTasks(collapse) {
+            appState.tasks.forEach(task => {
+                appState.collapsedTasks[task.id] = collapse;
+            });
+            saveToStorage();
+            renderTasks();
+        }
+
+        function updateTask(id, field, value) {
+            const task = appState.tasks.find(t => t.id === id);
+            if (task) {
+                task[field] = field === 'name' ? value : parseInt(value);
+                saveToStorage();
+                if (field !== 'name') {
+                    renderTasks();
+                }
+            }
+        }
+
+        function renderTasks() {
+            const grid = document.getElementById('tasks-grid');
+            
+            if (appState.tasks.length === 0) {
+                grid.innerHTML = `
+                    <div class="add-card" onclick="addTask()">
+                        <div class="add-card-icon">+</div>
+                        <div class="add-card-text">Tilføj din første opgave</div>
+                    </div>
+                `;
+                return;
+            }
+
+            let html = '';
+            appState.tasks.forEach((task, index) => {
+                const color = getTaskColor(index);
+                const isCollapsed = appState.collapsedTasks[task.id];
+                const displayName = task.name || 'Unavngivet opgave';
+                
+                html += `
+                    <div class="task-card ${isCollapsed ? 'collapsed' : ''}" data-task-id="${task.id}" style="border-left: 4px solid ${color};">
+                        <div class="task-card-header" onclick="toggleTask('${task.id}', event)">
+                            <div class="task-name-wrapper">
+                                <span class="collapse-icon">▼</span>
+                                ${isCollapsed ? `
+                                    <span class="task-name">${escapeHtml(displayName)}</span>
+                                ` : `
+                                    <input 
+                                        type="text" 
+                                        class="task-name-input" 
+                                        value="${escapeHtml(task.name)}"
+                                        placeholder="Navngiv denne opgave..."
+                                        onchange="updateTask('${task.id}', 'name', this.value)"
+                                        onclick="event.stopPropagation()"
+                                    />
+                                `}
+                            </div>
+                            <div class="task-card-actions">
+                                <button class="btn btn-icon btn-small delete-btn" onclick="deleteTask('${task.id}', event)" title="Slet">
+                                    ✕
+                                </button>
+                            </div>
+                        </div>
+                        <div class="task-card-body">
+                            ${renderQualityControl(task, 'profitability')}
+                            ${renderQualityControl(task, 'complexity')}
+                            ${renderQualityControl(task, 'risk')}
+                            ${renderQualityControl(task, 'frequency')}
+                            ${renderQualityControl(task, 'annoyance')}
+                            ${renderQualityControl(task, 'automation')}
+                        </div>
+                    </div>
+                `;
+            });
+
+            html += `
+                <div class="add-card" onclick="addTask()">
+                    <div class="add-card-icon">+</div>
+                    <div class="add-card-text">Tilføj opgave</div>
+                </div>
+            `;
+
+            grid.innerHTML = html;
+        }
+
+        function renderQualityControl(task, quality) {
+            const q = qualities[quality];
+            const value = task[quality];
+            
+            return `
+                <div class="quality-group">
+                    <div class="quality-header">
+                        <div class="quality-label">
+                            <div>
+                                <div class="quality-name">${q.name}</div>
+                                <div class="quality-description">${q.description}</div>
+                            </div>
+                            <span class="quality-value" data-value="${value}">${q.labels[value]}</span>
+                        </div>
+                    </div>
+                    <div class="segment-control">
+                        ${[-2, -1, 1, 2].map(v => `
+                            <button 
+                                class="segment-btn ${value === v ? 'active' : ''}" 
+                                data-value="${v}"
+                                onclick="updateTask('${task.id}', '${quality}', ${v})"
+                            >
+                                ${q.labels[v]}
+                            </button>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderCharts() {
+            const grid = document.getElementById('charts-grid');
+            
+            if (appState.tasks.length === 0) {
+                grid.innerHTML = `
+                    <div class="empty-state" style="grid-column: 1 / -1;">
+                        <div class="empty-state-icon">📊</div>
+                        <h3 class="empty-state-title">Ingen opgaver endnu</h3>
+                        <p>Tilføj nogle opgaver i "Opgaver" fanen for at se dem her.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            let html = '';
+            appState.charts.forEach(chart => {
+                html += renderChart(chart);
+            });
+
+            grid.innerHTML = html;
+        }
+
+        function renderChart(chart) {
+            const xQuality = qualities[chart.xAxis];
+            const yQuality = qualities[chart.yAxis];
+            const title = `${xQuality.name} vs ${yQuality.name}`;
+            const insights = getQuadrantInsights(chart.xAxis, chart.yAxis);
+
+            return `
+                <div class="chart-card">
+                    <div class="chart-header">
+                        <h3 class="chart-title">${title}</h3>
+                        ${!chart.isDefault ? `
+                            <button class="btn btn-small btn-icon delete-btn" onclick="deleteChart('${chart.id}')" title="Fjern">
+                                ✕
+                            </button>
+                        ` : ''}
+                    </div>
+                    <div class="chart-area">
+                        <div class="chart-container">
+                            ${renderChartSVG(chart, xQuality, yQuality)}
+                        </div>
+                        <div class="chart-legend">
+                            <div class="chart-legend-title">Opgaver</div>
+                            ${appState.tasks.map((task, i) => `
+                                <div class="chart-legend-item">
+                                    <div class="chart-legend-dot" style="background: ${getTaskColor(i)};"></div>
+                                    <span class="chart-legend-name" title="${escapeHtml(task.name || 'Unavngivet')}">${i + 1}. ${escapeHtml(truncate(task.name || 'Unavngivet', 12))}</span>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                    <div class="quadrant-hints">
+                        <div class="quadrant-hint top-left">
+                            <div class="quadrant-hint-title">${insights.topLeft.title}</div>
+                            <div class="quadrant-hint-desc">${insights.topLeft.desc}</div>
+                        </div>
+                        <div class="quadrant-hint top-right">
+                            <div class="quadrant-hint-title">${insights.topRight.title}</div>
+                            <div class="quadrant-hint-desc">${insights.topRight.desc}</div>
+                        </div>
+                        <div class="quadrant-hint bottom-left">
+                            <div class="quadrant-hint-title">${insights.bottomLeft.title}</div>
+                            <div class="quadrant-hint-desc">${insights.bottomLeft.desc}</div>
+                        </div>
+                        <div class="quadrant-hint bottom-right">
+                            <div class="quadrant-hint-title">${insights.bottomRight.title}</div>
+                            <div class="quadrant-hint-desc">${insights.bottomRight.desc}</div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderChartSVG(chart, xQuality, yQuality) {
+            const padding = 65;
+            const size = 340;
+            const plotSize = size - padding * 2;
+            const center = padding + plotSize / 2;
+
+            function mapValue(val) {
+                const mapping = { '-2': 0.1, '-1': 0.35, '1': 0.65, '2': 0.9 };
+                return mapping[val] || 0.5;
+            }
+
+            const positionMap = new Map();
+            appState.tasks.forEach((task, index) => {
+                const xVal = task[chart.xAxis];
+                const yVal = task[chart.yAxis];
+                const key = `${xVal}-${yVal}`;
+                if (!positionMap.has(key)) {
+                    positionMap.set(key, []);
+                }
+                positionMap.get(key).push({ task, index });
+            });
+
+            let pointsHtml = '';
+            positionMap.forEach((tasksAtPos, key) => {
+                const [xVal, yVal] = key.split('-').map(Number);
+                const baseX = padding + mapValue(xVal) * plotSize;
+                const baseY = padding + (1 - mapValue(yVal)) * plotSize;
+
+                const spreadRadius = 20;
+                tasksAtPos.forEach((item, i) => {
+                    let x = baseX;
+                    let y = baseY;
+                    
+                    if (tasksAtPos.length > 1) {
+                        const angle = (2 * Math.PI * i) / tasksAtPos.length - Math.PI / 2;
+                        const radius = spreadRadius * (1 + Math.floor(i / 6) * 0.5);
+                        x = baseX + Math.cos(angle) * radius;
+                        y = baseY + Math.sin(angle) * radius;
+                    }
+
+                    const color = getTaskColor(item.index);
+                    const taskName = item.task.name || 'Unavngivet';
+                    
+                    pointsHtml += `
+                        <g class="chart-point" 
+                           onmouseover="showTooltip(event, '${escapeHtml(taskName)}')"
+                           onmouseout="hideTooltip()">
+                            <circle cx="${x}" cy="${y}" r="12" fill="${color}" opacity="0.9"/>
+                            <text class="chart-point-number" x="${x}" y="${y}">${item.index + 1}</text>
+                        </g>
+                    `;
+                });
+            });
+
+            return `
+                <svg class="chart-svg" viewBox="0 0 ${size} ${size}">
+                    <rect x="${padding}" y="${padding}" width="${plotSize/2}" height="${plotSize/2}" fill="#FEF3E8" opacity="0.6"/>
+                    <rect x="${center}" y="${padding}" width="${plotSize/2}" height="${plotSize/2}" fill="#E8F5E9" opacity="0.6"/>
+                    <rect x="${padding}" y="${center}" width="${plotSize/2}" height="${plotSize/2}" fill="#FFEBEE" opacity="0.6"/>
+                    <rect x="${center}" y="${center}" width="${plotSize/2}" height="${plotSize/2}" fill="#FFF8E1" opacity="0.6"/>
+                    
+                    <line x1="${padding}" y1="${center}" x2="${size - padding}" y2="${center}" stroke="#D4D1C9" stroke-width="1"/>
+                    <line x1="${center}" y1="${padding}" x2="${center}" y2="${size - padding}" stroke="#D4D1C9" stroke-width="1"/>
+                    
+                    <rect x="${padding}" y="${padding}" width="${plotSize}" height="${plotSize}" fill="none" stroke="#D4D1C9" stroke-width="1"/>
+                    
+                    <text class="chart-axis-label" x="${padding}" y="${size - 25}" text-anchor="start">${xQuality.axisLabels.negative}</text>
+                    <text class="chart-axis-label" x="${size - padding}" y="${size - 25}" text-anchor="end">${xQuality.axisLabels.positive}</text>
+                    <text class="chart-axis-label" x="18" y="${size - padding - 5}" text-anchor="start" transform="rotate(-90, 18, ${size - padding - 5})">${yQuality.axisLabels.negative}</text>
+                    <text class="chart-axis-label" x="18" y="${padding + 5}" text-anchor="end" transform="rotate(-90, 18, ${padding + 5})">${yQuality.axisLabels.positive}</text>
+                    
+                    <text class="chart-axis-label" x="${size/2}" y="${size - 8}" text-anchor="middle" style="font-size: 11px; fill: #9A9A9A;">${xQuality.name}</text>
+                    <text class="chart-axis-label" x="10" y="${size/2}" text-anchor="middle" transform="rotate(-90, 10, ${size/2})" style="font-size: 11px; fill: #9A9A9A;">${yQuality.name}</text>
+                    
+                    ${pointsHtml}
+                </svg>
+            `;
+        }
+
+        function addCustomChart() {
+            const xAxis = document.getElementById('custom-x-axis').value;
+            const yAxis = document.getElementById('custom-y-axis').value;
+            
+            if (xAxis === yAxis) {
+                alert('Vælg venligst to forskellige akser.');
+                return;
+            }
+
+            const exists = appState.charts.some(c => 
+                (c.xAxis === xAxis && c.yAxis === yAxis) ||
+                (c.xAxis === yAxis && c.yAxis === xAxis)
+            );
+
+            if (exists) {
+                alert('Dette perspektiv findes allerede.');
+                return;
+            }
+
+            appState.charts.push({
+                id: generateId(),
+                xAxis,
+                yAxis,
+                isDefault: false
+            });
+
+            saveToStorage();
+            renderCharts();
+        }
+
+        function deleteChart(id) {
+            appState.charts = appState.charts.filter(c => c.id !== id);
+            saveToStorage();
+            renderCharts();
+        }
+
+        function showTooltip(event, text) {
+            const tooltip = document.getElementById('tooltip');
+            tooltip.textContent = text;
+            tooltip.style.left = event.pageX + 15 + 'px';
+            tooltip.style.top = event.pageY - 35 + 'px';
+            tooltip.classList.add('visible');
+        }
+
+        function hideTooltip() {
+            document.getElementById('tooltip').classList.remove('visible');
+        }
+
+        function saveToStorage() {
+            localStorage.setItem('opgavePrioritering', JSON.stringify(appState));
+        }
+
+        function loadFromStorage() {
+            const saved = localStorage.getItem('opgavePrioritering');
+            if (saved) {
+                try {
+                    const parsed = JSON.parse(saved);
+                    appState.tasks = parsed.tasks || parsed.services || [];
+                    appState.collapsedTasks = parsed.collapsedTasks || {};
+                    const savedCharts = parsed.charts || [];
+                    const customCharts = savedCharts.filter(c => !c.isDefault);
+                    const defaultCharts = appState.charts.filter(c => c.isDefault);
+                    appState.charts = [...defaultCharts, ...customCharts];
+                } catch (e) {
+                    console.error('Kunne ikke indlæse gemt data:', e);
+                }
+            }
+        }
+
+        function exportData() {
+            const dataStr = JSON.stringify(appState, null, 2);
+            const blob = new Blob([dataStr], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'opgave-prioritering-' + new Date().toISOString().split('T')[0] + '.json';
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        function showImportModal() {
+            document.getElementById('import-modal').classList.add('active');
+            document.getElementById('import-textarea').value = '';
+        }
+
+        function hideImportModal() {
+            document.getElementById('import-modal').classList.remove('active');
+        }
+
+        function importData() {
+            const textarea = document.getElementById('import-textarea');
+            try {
+                const data = JSON.parse(textarea.value);
+                if (data.tasks || data.services) {
+                    appState.tasks = data.tasks || data.services;
+                }
+                if (data.collapsedTasks) {
+                    appState.collapsedTasks = data.collapsedTasks;
+                }
+                if (data.charts) {
+                    const customCharts = data.charts.filter(c => !c.isDefault);
+                    const defaultCharts = appState.charts.filter(c => c.isDefault);
+                    appState.charts = [...defaultCharts, ...customCharts];
+                }
+                saveToStorage();
+                renderTasks();
+                renderCharts();
+                hideImportModal();
+                alert('Data importeret!');
+            } catch (e) {
+                alert('Kunne ikke læse data. Tjek at det er gyldigt JSON format.');
+            }
+        }
+
+        document.getElementById('import-modal').addEventListener('click', (e) => {
+            if (e.target.classList.contains('modal-overlay')) {
+                hideImportModal();
+            }
+        });
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        function truncate(str, len) {
+            return str.length > len ? str.substring(0, len - 1) + '…' : str;
+        }
+
+        init();
+    </script>
+</body>
+</html>
